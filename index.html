@@ -1162,7 +1162,10 @@
             
             // Escala conservadora para garantir que caiba no canvas
             const canvasMinDim = Math.min(fourierCanvas.width, fourierCanvas.height);
-            const scaleFactor = maxAmplitude > 0 ? (canvasMinDim * 0.25) / maxAmplitude : 1;
+            const scaleFactor = Math.min(
+                maxAmplitude > 0 ? (canvasMinDim * 0.25) / maxAmplitude : 1,
+                50  // Limite máximo de escala
+            );
             
             function animate() {
                 if (!isAnimating) return;
