@@ -838,6 +838,7 @@
             strokeGaps = [];
             isAnimating = false;
             animationTime = 0;
+            fixedScaleFactor = null;
             
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
@@ -1138,8 +1139,6 @@
             updateCoefficientsTable(filteredData);
         }
         
-
-        
         // Animação FFT
         function animateFourier() {
             if (!fourierData || fourierData.length === 0) {
@@ -1154,18 +1153,13 @@
                 animationTime = 0;
             }
             
-            // Calcula escala simples baseada na amplitude máxima
+            let fixedScaleFactor = null;
             let maxAmplitude = 0;
             for (let i = 0; i < Math.min(fourierData.length, 20); i++) {
                 maxAmplitude = Math.max(maxAmplitude, fourierData[i].amplitude);
             }
-            
-            // Escala conservadora para garantir que caiba no canvas
             const canvasMinDim = Math.min(fourierCanvas.width, fourierCanvas.height);
-            const scaleFactor = Math.min(
-                maxAmplitude > 0 ? (canvasMinDim * 0.25) / maxAmplitude : 1,
-                50  // Limite máximo de escala
-            );
+            fixedScaleFactor = maxAmplitude > 0 ? (canvasMinDim * 0.25) / maxAmplitude : 1;
             
             function animate() {
                 if (!isAnimating) return;
@@ -1177,6 +1171,8 @@
                 
                 let x = centerX;
                 let y = centerY;
+                
+                const scaleFactor = fixedScaleFactor;
                 
                 // Mostra apenas vetores se checkbox estiver marcado
                 const showVectors = document.getElementById('show-vectors').checked;
