@@ -1,0 +1,1446 @@
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicação de Desenho com Transformadas de Fourier</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+        
+        .app-title {
+            font-size: 24px;
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .menu {
+            background-color: #34495e;
+            display: flex;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-item.active {
+            background-color: #1abc9c;
+        }
+        
+        .menu-item:hover {
+            background-color: #2980b9;
+        }
+        
+        .canvas-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .canvas-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        canvas {
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+        
+        .canvas-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .controls-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .primary-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.primary {
+            background-color: #1abc9c;
+        }
+        
+        button.primary:hover {
+            background-color: #16a085;
+        }
+        
+        button.secondary {
+            background-color: #95a5a6;
+        }
+        
+        button.secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            min-width: 280px;
+        }
+        
+        .slider-container label {
+            margin-right: 10px;
+            min-width: 150px;
+        }
+        
+        input[type="range"] {
+            flex-grow: 1;
+            max-width: 200px;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .checkbox-container label {
+            margin-left: 5px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+        
+        .spectrum-graph {
+            width: 100%;
+            height: 180px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .frequency-bar {
+            position: absolute;
+            bottom: 0;
+            width: 18px;
+            background-color: #3498db;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            transition: height 0.3s;
+        }
+        
+        .frequency-bar:hover {
+            background-color: #2980b9;
+        }
+        
+        .coefficients-table {
+            width: 100%;
+            border-collapse: collapse;
+            max-height: 300px;
+            overflow-y: auto;
+            display: block;
+        }
+        
+        .coefficients-table thead,
+        .coefficients-table tbody {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+        
+        .coefficients-table th {
+            background-color: #ecf0f1;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .coefficients-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .coefficients-table input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-button {
+            padding: 6px 12px;
+            background-color: #ecf0f1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-button.active {
+            background-color: #1abc9c;
+            color: white;
+            border-color: #16a085;
+        }
+        
+        .filter-button:hover {
+            background-color: #dde4e6;
+        }
+        
+        .examples-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .example-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .example-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .equations {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        .mathematical-formulas {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #1abc9c;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .performance-info {
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .spacer {
+            width: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #95a5a6;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .canvas-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .spacer {
+                transform: rotate(90deg);
+                margin: 15px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="app-title">Aplicação de Desenho com Transformadas de Fourier</h1>
+    </header>
+    
+    <div class="container">
+
+        
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <div class="canvas-label">Desenho Original</div>
+                <canvas id="drawing-canvas" width="500" height="400"></canvas>
+            </div>
+            
+            <div class="spacer">⟷</div>
+            
+            <div class="canvas-wrapper">
+                <div class="canvas-label">Reconstrução de Fourier</div>
+                <canvas id="fourier-canvas" width="500" height="400"></canvas>
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <div class="primary-buttons">
+                <button class="primary" id="clear-btn">Limpar</button>
+                <button class="primary" id="analyze-btn">Analisar com FFT</button>
+                <button class="primary" id="animate-btn">Iniciar Animação</button>
+                <button class="secondary" id="compare-btn">Comparar Original</button>
+            </div>
+            
+            <div class="performance-info" id="performance-info">
+                A aguardar análise do desenho...
+            </div>
+            
+            <h3 class="section-title">Configurações de Visualização</h3>
+            
+            <div class="control-group">
+                <div class="slider-container">
+                    <label>Número de Coeficientes:</label>
+                    <input type="range" id="coefficients" min="8" max="512" value="128" step="8">
+                    <span id="coeff-value">128</span>
+                </div>
+                
+                <div class="slider-container">
+                    <label>Velocidade de Animação:</label>
+                    <input type="range" id="speed" min="1" max="10" value="5">
+                    <span id="speed-value">5</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="show-vectors" checked>
+                    <label for="show-vectors">Mostrar Vetores</label>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="show-circles" checked>
+                    <label for="show-circles">Mostrar Círculos</label>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="show-path">
+                    <label for="show-path">Mostrar Caminho Completo</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <h3 class="section-title">Editor de Coeficientes FFT</h3>
+            
+            <div class="filter-buttons">
+                <div class="filter-button active" onclick="filterFrequencies('all')">Todas</div>
+                <div class="filter-button" onclick="filterFrequencies('low')">Baixas</div>
+                <div class="filter-button" onclick="filterFrequencies('mid')">Médias</div>
+                <div class="filter-button" onclick="filterFrequencies('high')">Altas</div>
+            </div>
+            
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table class="coefficients-table">
+                    <thead>
+                        <tr>
+                            <th>Frequência (k)</th>
+                            <th>Amplitude |c_k|</th>
+                            <th>Fase φ</th>
+                            <th>Ativar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="coefficients-tbody">
+                        <!-- Coeficientes serão preenchidos dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <h3 class="section-title">Fórmulas Matemáticas Implementadas</h3>
+            
+            <div class="mathematical-formulas">
+                <h4>1. Transformada Discreta de Fourier (DFT):</h4>
+                <p>c_k = (1/N) * Σ(n=0 to N-1) f(t_n) * e^(-i*2π*k*t_n)</p>
+                
+                <h4>2. Fast Fourier Transform (FFT) - Algoritmo Cooley-Tukey:</h4>
+                <p>Reduz complexidade de O(N²) para O(N*log(N))</p>
+                <p>Usa divisão recursiva: FFT_N = FFT_par + W_N^k * FFT_ímpar</p>
+                
+                <h4>3. Conversão para Amplitude e Fase:</h4>
+                <p>Amplitude: A = |c_k| = √(Re(c_k)² + Im(c_k)²)</p>
+                <p>Fase: φ = arg(c_k) = arctan(Im(c_k) / Re(c_k))</p>
+                
+                <h4>4. Transformada Inversa de Fourier (IFFT):</h4>
+                <p>f(t) = Σ(k) c_k * e^(i*2π*k*t)</p>
+                <p>Reconstrução: x(t) = Σ A_k * cos(2πkt + φ_k)</p>
+            </div>
+        </div>
+        
+        <div class="equations">
+            <h3 class="section-title">Análise dos Coeficientes de Fourier</h3>
+            <div id="equations-content">
+                <p>Desenhe algo e clique em "Analisar com FFT" para ver a decomposição matemática.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do ecrã e variáveis globais
+        const drawingCanvas = document.getElementById('drawing-canvas');
+        const fourierCanvas = document.getElementById('fourier-canvas');
+        const drawingCtx = drawingCanvas.getContext('2d');
+        const fourierCtx = fourierCanvas.getContext('2d');
+        
+        // Elementos da interface
+        const clearBtn = document.getElementById('clear-btn');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const animateBtn = document.getElementById('animate-btn');
+        const compareBtn = document.getElementById('compare-btn');
+        const coeffSlider = document.getElementById('coefficients');
+        const coeffValue = document.getElementById('coeff-value');
+        const speedSlider = document.getElementById('speed');
+        const speedValue = document.getElementById('speed-value');
+        const equationsContent = document.getElementById('equations-content');
+        const performanceInfo = document.getElementById('performance-info');
+        const coefficientsTable = document.getElementById('coefficients-tbody');
+        
+        // Variáveis globais
+        let isDrawing = false;
+        let points = [];
+        let fourierData = [];
+        let isAnimating = false;
+        let animationTime = 0;
+        let animationFrame;
+        let numCoefficients = parseInt(coeffSlider.value);
+        let animationSpeed = parseInt(speedSlider.value);
+        let showComparison = false;
+        let strokeGaps = []; // Armazena valores t onde os traços começam/terminam
+        
+        // ===================================
+        // CLASSES MATEMÁTICAS PARA APRESENTAÇÃO
+        // ===================================
+        
+        /**
+         * CLASSE PRINCIPAL: Matemática das Transformadas de Fourier
+         * Contém todos os métodos matemáticos fundamentais para apresentação
+         */
+        class FourierMath {
+            
+            /**
+             * MÉTODO PRINCIPAL: Fast Fourier Transform (FFT)
+             * Implementa o algoritmo recursivo
+             * Complexidade: O(N log N) vs O(N²) da DFT tradicional
+             * 
+             * @param {Array} signal - Array de números complexos {re, im}
+             * @returns {Array} - Coeficientes de Fourier transformados
+             */
+            static fft(signal) {
+                const N = signal.length;
+                
+                // Caso base da recursão
+                if (N <= 1) return signal;
+                
+                // Verifica se N é potência de 2 (requisito do algoritmo)
+                if (N % 2 !== 0) {
+                    throw new Error('FFT requer tamanho de potência de 2');
+                }
+                
+                // PASSO 1: Divisão - separa índices pares e ímpares
+                const even = [];
+                const odd = [];
+                
+                for (let i = 0; i < N; i += 2) {
+                    even.push(signal[i]);
+                    odd.push(signal[i + 1]);
+                }
+                
+                // PASSO 2: Conquista - chamadas recursivas
+                const evenFFT = this.fft(even);
+                const oddFFT = this.fft(odd);
+                
+                // PASSO 3: Combinação usando fatores de rotação
+                const result = new Array(N);
+                const halfN = N / 2;
+                
+                for (let k = 0; k < halfN; k++) {
+                    // Calcula fator de rotação: W_N^k = e^(-i*2π*k/N)
+                    const angle = -2 * Math.PI * k / N;
+                    const twiddle = this.complexExp(angle);
+                    
+                    // Multiplica fator de rotação pelo resultado ímpar
+                    const oddTerm = this.complexMult(twiddle, oddFFT[k]);
+                    
+                    // Operação básica FFT: X[k] = X_even[k] + W_N^k * X_odd[k]
+                    result[k] = this.complexAdd(evenFFT[k], oddTerm);
+                    
+                    // Segunda metade: X[k + N/2] = X_even[k] - W_N^k * X_odd[k]
+                    result[k + halfN] = this.complexSub(evenFFT[k], oddTerm);
+                }
+                
+                return result;
+            }
+            
+            /**
+             * MÉTODO DE COMPARAÇÃO: DFT Tradicional
+             * Implementação direta da Transformada Discreta de Fourier
+             * Complexidade: O(N²) - usado para comparação de performance
+             * 
+             * Fórmula: c_k = (1/N) * Σ(n=0 to N-1) f(t_n) * e^(-i*2π*k*n/N)
+             */
+            static dft(signal) {
+                const N = signal.length;
+                const result = [];
+                
+                for (let k = 0; k < N; k++) {
+                    let sum = { re: 0, im: 0 };
+                    
+                    // Aplicação direta da fórmula DFT
+                    for (let n = 0; n < N; n++) {
+                        const angle = -2 * Math.PI * k * n / N;
+                        const exponential = this.complexExp(angle);
+                        const product = this.complexMult(signal[n], exponential);
+                        sum = this.complexAdd(sum, product);
+                    }
+                    
+                    // Normalização do coeficiente
+                    result.push({
+                        re: sum.re / N,
+                        im: sum.im / N
+                    });
+                }
+                
+                return result;
+            }
+            
+            /**
+             * MÉTODO FUNDAMENTAL: Transformada Inversa (IFFT)
+             * Reconstrói o sinal original a partir dos coeficientes
+             * Fórmula: f(t) = Σ(k) c_k * e^(i*2π*k*t)
+             */
+            static ifft(coefficients) {
+                const N = coefficients.length;
+                
+                // Conjuga os coeficientes (muda sinal da parte imaginária)
+                const conjugated = coefficients.map(c => ({
+                    re: c.re,
+                    im: -c.im
+                }));
+                
+                // Aplica FFT nos coeficientes conjugados
+                const result = this.fft(conjugated);
+                
+                // Conjuga novamente e normaliza
+                return result.map(c => ({
+                    re: c.re / N,
+                    im: -c.im / N
+                }));
+            }
+            
+            /**
+             * MÉTODO DE ANÁLISE: Extração de Amplitude e Fase
+             * Converte coeficientes complexos para forma polar
+             * 
+             * Amplitude: |c_k| = √(Re(c_k)² + Im(c_k)²)
+             * Fase: φ = arctan(Im(c_k) / Re(c_k))
+             */
+            static getAmplitudeAndPhase(complex) {
+                const amplitude = Math.sqrt(complex.re * complex.re + complex.im * complex.im);
+                const phase = Math.atan2(complex.im, complex.re);
+                return { amplitude, phase };
+            }
+            
+            /**
+             * MÉTODO DE CONVERSÃO: Pontos Cartesianos para Complexos
+             * Transforma coordenadas (x,y) em números complexos (x + iy)
+             */
+            static pointsToComplex(points, centerX, centerY) {
+                return points.map(p => ({
+                    re: p.x - centerX,
+                    im: p.y - centerY
+                }));
+            }
+            
+            /**
+             * MÉTODO DE PREPARAÇÃO: Padding para FFT
+             * Ajusta tamanho do sinal para potência de 2 (requisito FFT)
+             */
+            static prepareForFFT(complexSignal, targetSize) {
+                const padded = [...complexSignal];
+                
+                // Zero-padding até atingir tamanho desejado
+                while (padded.length < targetSize) {
+                    padded.push({ re: 0, im: 0 });
+                }
+                
+                return padded.slice(0, targetSize);
+            }
+            
+            // ===================================
+            // OPERAÇÕES FUNDAMENTAIS COM NÚMEROS COMPLEXOS
+            // ===================================
+            
+            /** Adição: (a + bi) + (c + di) = (a+c) + (b+d)i */
+            static complexAdd(a, b) {
+                return { re: a.re + b.re, im: a.im + b.im };
+            }
+            
+            /** Subtração: (a + bi) - (c + di) = (a-c) + (b-d)i */
+            static complexSub(a, b) {
+                return { re: a.re - b.re, im: a.im - b.im };
+            }
+            
+            /** Multiplicação: (a + bi)(c + di) = (ac-bd) + (ad+bc)i */
+            static complexMult(a, b) {
+                return {
+                    re: a.re * b.re - a.im * b.im,
+                    im: a.re * b.im + a.im * b.re
+                };
+            }
+            
+            /** Exponencial complexa: e^(iθ) = cos(θ) + i*sin(θ) (Fórmula de Euler) */
+            static complexExp(theta) {
+                return {
+                    re: Math.cos(theta),
+                    im: Math.sin(theta)
+                };
+            }
+        }
+        
+        /**
+         * CLASSE DE ANÁLISE: Comparação de Performance Algorítmica
+         * Demonstra as diferenças de complexidade entre DFT e FFT
+         */
+        class PerformanceAnalyzer {
+            
+            /**
+             * MÉTODO DE BENCHMARK: Compara DFT vs FFT
+             * Mede tempos de execução e calcula fatores de aceleração
+             * 
+             * @param {Array} signal - Sinal a ser analisado
+             * @returns {Object} - Métricas de performance detalhadas
+             */
+            static compareAlgorithms(signal) {
+                const N = signal.length;
+                
+                // Benchmark DFT (limitado para evitar travamento)
+                const dftTestSize = Math.min(64, N);
+                const dftStart = performance.now();
+                const dftResult = FourierMath.dft(signal.slice(0, dftTestSize));
+                const dftTime = performance.now() - dftStart;
+                
+                // Prepara dados para FFT (potência de 2)
+                const fftSize = Math.pow(2, Math.ceil(Math.log2(N)));
+                const paddedSignal = FourierMath.prepareForFFT(signal, fftSize);
+                
+                // Benchmark FFT
+                const fftStart = performance.now();
+                const fftResult = FourierMath.fft(paddedSignal);
+                const fftTime = performance.now() - fftStart;
+                
+                // Calcula métricas de complexidade teórica
+                const dftComplexity = Math.pow(dftTestSize, 2);
+                const fftComplexity = fftSize * Math.log2(fftSize);
+                
+                return {
+                    dftTime,
+                    fftTime,
+                    speedup: dftTime / fftTime,
+                    dftComplexity,
+                    fftComplexity,
+                    actualSize: N,
+                    fftSize,
+                    theoreticalSpeedup: dftComplexity / fftComplexity
+                };
+            }
+            
+            /**
+             * MÉTODO EDUCATIVO: Explica complexidades algorítmicas
+             */
+            static explainComplexity(N) {
+                const dftOps = N * N;
+                const fftOps = N * Math.log2(N);
+                
+                return {
+                    message: `Para ${N} pontos:`,
+                    dft: `DFT: ${dftOps} operações (O(N²))`,
+                    fft: `FFT: ${Math.round(fftOps)} operações (O(N log N))`,
+                    improvement: `FFT é ${Math.round(dftOps/fftOps)}x mais eficiente`
+                };
+            }
+        }
+        
+        /**
+         * CLASSE DE RECONSTRUÇÃO: Síntese de Fourier (Transformada Inversa)
+         * Reconstrói sinais a partir de coeficientes de frequência
+         */
+        class FourierSynthesis {
+            
+            /**
+             * MÉTODO DE RECONSTRUÇÃO: Síntese do sinal
+             * Implementa: f(t) = Σ A_k * cos(2πkt + φ_k)
+             * 
+             * @param {Array} coefficients - Coeficientes {freq, amplitude, phase}
+             * @param {number} t - Parâmetro de tempo (0 a 1)
+             * @returns {Object} - Ponto reconstruído {x, y}
+             */
+            static reconstructPoint(coefficients, t) {
+                let x = 0;
+                let y = 0;
+                
+                for (let coeff of coefficients) {
+                    if (coeff.enabled === false) continue;
+                    
+                    const { freq, amplitude, phase } = coeff;
+                    const angle = freq * t * 2 * Math.PI + phase;
+                    
+                    // Componentes do vetor rotacional
+                    x += amplitude * Math.cos(angle);
+                    y += amplitude * Math.sin(angle);
+                }
+                
+                return { x, y };
+            }
+            
+            /**
+             * MÉTODO EDUCATIVO: Mostra contribuição individual de cada frequência
+             */
+            static getFrequencyContribution(coefficient, t) {
+                const { freq, amplitude, phase } = coefficient;
+                const angle = freq * t * 2 * Math.PI + phase;
+                
+                return {
+                    frequency: freq,
+                    angle: angle,
+                    contribution: {
+                        x: amplitude * Math.cos(angle),
+                        y: amplitude * Math.sin(angle)
+                    },
+                    vector: {
+                        magnitude: amplitude,
+                        direction: angle
+                    }
+                };
+            }
+        }
+        
+        // Funções de desenho
+        function startDrawing(e) {
+            const rect = drawingCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            isDrawing = true;
+            
+            if (!points.length) {
+                points = [{ x, y, newStroke: true }];
+            } else {
+                points.push({ x, y, newStroke: true });
+            }
+            
+            drawingCtx.beginPath();
+            drawingCtx.moveTo(x, y);
+            drawingCtx.lineWidth = 3;
+            drawingCtx.lineCap = 'round';
+            drawingCtx.lineJoin = 'round';
+            drawingCtx.strokeStyle = 'black';
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = drawingCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            points.push({ x, y, newStroke: false });
+            
+            drawingCtx.lineTo(x, y);
+            drawingCtx.stroke();
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        function clearCanvas() {
+            points = [];
+            fourierData = [];
+            strokeGaps = [];
+            isAnimating = false;
+            animationTime = 0;
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            fourierCtx.clearRect(0, 0, fourierCanvas.width, fourierCanvas.height);
+            equationsContent.innerHTML = '<p>Desenhe algo e clique em "Analisar com FFT" para ver a decomposição matemática.</p>';
+            performanceInfo.innerHTML = 'Aguardando análise do desenho...';
+            coefficientsTable.innerHTML = '';
+            animateBtn.textContent = 'Iniciar Animação';
+        }
+        
+        // Função principal de análise FFT
+        function calculateFourierFFT() {
+            if (points.length < 4) {
+                alert('Por favor, desenhe algo mais complexo primeiro.');
+                return;
+            }
+            
+            // Calcula centro
+            let sumX = 0, sumY = 0;
+            for (let i = 0; i < points.length; i++) {
+                sumX += points[i].x;
+                sumY += points[i].y;
+            }
+            const centerX = sumX / points.length;
+            const centerY = sumY / points.length;
+            
+            // Mantém controle de cada traço como um grupo separado
+            const strokes = [];
+            let currentStroke = [];
+            
+            for (let i = 0; i < points.length; i++) {
+                const point = points[i];
+                
+                // Se este é um novo traço e já temos pontos,
+                // salve o traço atual e inicie um novo
+                if (point.newStroke) {
+                    if (currentStroke.length > 0) {
+                        strokes.push(currentStroke);
+                        currentStroke = [];
+                    }
+                }
+                
+                // Adiciona este ponto ao traço atual
+                currentStroke.push({ x: point.x - centerX, y: point.y - centerY });
+            }
+            
+            // Adiciona o último traço se tiver pontos
+            if (currentStroke.length > 0) {
+                strokes.push(currentStroke);
+            }
+            
+            console.log(`O desenho tem ${strokes.length} traços separados`);
+            
+            // Para cada traço, reamostra para ter espaçamento igual
+            const resampledStrokes = [];
+            const N = 100; // Número de pontos por traço após reamostragem
+            
+            for (let stroke of strokes) {
+                if (stroke.length <= 1) continue; // Pula traços com apenas um ponto
+                
+                // Reamostra este traço
+                const resampled = [];
+                const arcLengths = [0]; // Comprimento do arco cumulativo ao longo do traço
+                let totalLength = 0;
+                
+                // Calcula o comprimento do arco para cada segmento
+                for (let i = 1; i < stroke.length; i++) {
+                    const dx = stroke[i].x - stroke[i-1].x;
+                    const dy = stroke[i].y - stroke[i-1].y;
+                    const segmentLength = Math.sqrt(dx*dx + dy*dy);
+                    totalLength += segmentLength;
+                    arcLengths.push(totalLength);
+                }
+                
+                // Reamostra em intervalos de comprimento de arco iguais
+                for (let i = 0; i < N; i++) {
+                    const targetLength = (i / (N-1)) * totalLength;
+                    
+                    // Encontra os dois pontos originais que abrangem este comprimento de arco
+                    let low = 0;
+                    let high = arcLengths.length - 1;
+                    
+                    while (low < high) {
+                        const mid = Math.floor((low + high) / 2);
+                        if (arcLengths[mid] < targetLength) {
+                            low = mid + 1;
+                        } else {
+                            high = mid;
+                        }
+                    }
+                    
+                    // Agora low é o índice do primeiro ponto com arcLength >= targetLength
+                    // Interpola entre os pontos low-1 e low
+                    const idx1 = Math.max(0, low - 1);
+                    const idx2 = low;
+                    
+                    if (idx1 === idx2) {
+                        resampled.push({ re: stroke[idx1].x, im: stroke[idx1].y });
+                    } else {
+                        const arcLength1 = arcLengths[idx1];
+                        const arcLength2 = arcLengths[idx2];
+                        const t = (targetLength - arcLength1) / (arcLength2 - arcLength1);
+                        
+                        // Interpolação linear
+                        const p1 = stroke[idx1];
+                        const p2 = stroke[idx2];
+                        resampled.push({
+                            re: p1.x * (1-t) + p2.x * t,
+                            im: p1.y * (1-t) + p2.y * t
+                        });
+                    }
+                }
+                
+                resampledStrokes.push(resampled);
+            }
+            
+            // Agora combine todos os traços reamostrados - mas mantenha controle dos limites do traço
+            const allPoints = [];
+            const strokeStartIndices = [0]; // Índices onde novos traços começam
+            
+            for (let stroke of resampledStrokes) {
+                allPoints.push(...stroke);
+                strokeStartIndices.push(allPoints.length);
+            }
+            
+            // Remove o último limite (é apenas o final do último traço)
+            strokeStartIndices.pop();
+            
+            // Converte índices de início de traço para valores t (0 a 1)
+            const strokeBoundaries = strokeStartIndices.map(idx => idx / allPoints.length);
+            console.log("Limites de traço em valores t:", strokeBoundaries);
+            
+            // Armazena os limites do traço
+            strokeGaps = strokeBoundaries;
+            
+            // Análise de performance
+            const perfAnalysis = PerformanceAnalyzer.compareAlgorithms(allPoints);
+            
+            // Prepara dados para FFT
+            const fftSize = Math.min(Math.pow(2, Math.ceil(Math.log2(numCoefficients))), 512);
+            const resampledSignal = resampleSignal(allPoints, fftSize);
+            
+            // Executa FFT
+            const fftResult = FourierMath.fft(resampledSignal);
+            
+            // Processa resultados
+            const result = [];
+            const halfSize = fftSize / 2;
+            
+            for (let k = 0; k < fftSize; k++) {
+                // Ajusta índice para frequências negativas
+                const freq = k <= halfSize ? k : k - fftSize;
+                const { amplitude, phase } = FourierMath.getAmplitudeAndPhase(fftResult[k]);
+                
+                if (amplitude > 0.5) { // Filtra ruído
+                    result.push({
+                        freq,
+                        coeff: fftResult[k],
+                        amplitude,
+                        phase
+                    });
+                }
+            }
+            
+            // Ordena por amplitude
+            result.sort((a, b) => b.amplitude - a.amplitude);
+            
+            fourierData = result.slice(0, numCoefficients);
+            
+            // Atualiza interface
+            displayEquations(fourierData);
+            updatePerformanceInfo(perfAnalysis);
+            updateCoefficientsTable(fourierData);
+            
+            return fourierData;
+        }
+        
+        // Reamostragem do sinal
+        function resampleSignal(signal, targetSize) {
+            if (signal.length === targetSize) return signal;
+            
+            const resampled = [];
+            const ratio = signal.length / targetSize;
+            
+            for (let i = 0; i < targetSize; i++) {
+                const sourceIndex = i * ratio;
+                const lowerIndex = Math.floor(sourceIndex);
+                const upperIndex = Math.min(Math.ceil(sourceIndex), signal.length - 1);
+                const t = sourceIndex - lowerIndex;
+                
+                if (lowerIndex === upperIndex) {
+                    resampled.push(signal[lowerIndex]);
+                } else {
+                    // Interpolação linear
+                    const lower = signal[lowerIndex];
+                    const upper = signal[upperIndex];
+                    resampled.push({
+                        re: lower.re * (1 - t) + upper.re * t,
+                        im: lower.im * (1 - t) + upper.im * t
+                    });
+                }
+            }
+            
+            return resampled;
+        }
+        
+        // Atualiza informações de performance
+        function updatePerformanceInfo(analysis) {
+            performanceInfo.innerHTML = `
+                <strong>Análise de Performance:</strong><br>
+                Tamanho original: ${analysis.actualSize} pontos | FFT: ${analysis.fftSize} pontos<br>
+                Tempo DFT: ${analysis.dftTime.toFixed(2)}ms | Tempo FFT: ${analysis.fftTime.toFixed(2)}ms<br>
+                <strong>Aceleração: ${analysis.speedup.toFixed(1)}x mais rápido</strong><br>
+                Complexidade teórica - DFT: O(${analysis.dftComplexity}) | FFT: O(${analysis.fftComplexity.toFixed(0)})
+            `;
+        }
+        
+        // Atualiza tabela de coeficientes
+        function updateCoefficientsTable(data) {
+            coefficientsTable.innerHTML = '';
+            
+            data.slice(0, 20).forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.freq}</td>
+                    <td><input type="number" value="${item.amplitude.toFixed(3)}" step="0.001" min="0" 
+                         onchange="updateCoefficient(${index}, 'amplitude', this.value)"></td>
+                    <td><input type="number" value="${item.phase.toFixed(3)}" step="0.001" 
+                         onchange="updateCoefficient(${index}, 'phase', this.value)"></td>
+                    <td><input type="checkbox" checked onchange="toggleCoefficient(${index}, this.checked)"></td>
+                `;
+                coefficientsTable.appendChild(row);
+            });
+        }
+        
+
+        
+        // Funções de modificação de coeficientes
+        function updateCoefficient(index, property, value) {
+            if (fourierData[index]) {
+                if (property === 'amplitude') {
+                    fourierData[index].amplitude = parseFloat(value);
+                    // Atualiza coeficiente complexo
+                    const { amplitude, phase } = fourierData[index];
+                    fourierData[index].coeff = {
+                        re: amplitude * Math.cos(phase),
+                        im: amplitude * Math.sin(phase)
+                    };
+                } else if (property === 'phase') {
+                    fourierData[index].phase = parseFloat(value);
+                    // Atualiza coeficiente complexo
+                    const { amplitude, phase } = fourierData[index];
+                    fourierData[index].coeff = {
+                        re: amplitude * Math.cos(phase),
+                        im: amplitude * Math.sin(phase)
+                    };
+                }
+            }
+        }
+        
+        function toggleCoefficient(index, enabled) {
+            if (fourierData[index]) {
+                fourierData[index].enabled = enabled;
+            }
+        }
+        
+        // Filtros de frequência
+        function filterFrequencies(type) {
+            // Remove classe active de todos os botões
+            document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Adiciona classe active ao botão clicado
+            event.target.classList.add('active');
+            
+            if (!fourierData.length) return;
+            
+            let filteredData = fourierData;
+            
+            switch (type) {
+                case 'low':
+                    filteredData = fourierData.filter(d => Math.abs(d.freq) <= 5);
+                    break;
+                case 'mid':
+                    filteredData = fourierData.filter(d => Math.abs(d.freq) > 5 && Math.abs(d.freq) <= 20);
+                    break;
+                case 'high':
+                    filteredData = fourierData.filter(d => Math.abs(d.freq) > 20);
+                    break;
+                case 'all':
+                default:
+                    filteredData = fourierData;
+                    break;
+            }
+            
+            updateCoefficientsTable(filteredData);
+        }
+        
+
+        
+        // Animação FFT
+        function animateFourier() {
+            if (!fourierData || fourierData.length === 0) {
+                fourierData = calculateFourierFFT();
+                if (!fourierData || fourierData.length === 0) return;
+            }
+            
+            isAnimating = true;
+            animateBtn.textContent = 'Parar Animação';
+            
+            if (animationTime >= 1) {
+                animationTime = 0;
+            }
+            
+            // Calcula escala simples baseada na amplitude máxima
+            let maxAmplitude = 0;
+            for (let i = 0; i < Math.min(fourierData.length, 20); i++) {
+                maxAmplitude = Math.max(maxAmplitude, fourierData[i].amplitude);
+            }
+            
+            // Escala conservadora para garantir que caiba no canvas
+            const canvasMinDim = Math.min(fourierCanvas.width, fourierCanvas.height);
+            const scaleFactor = maxAmplitude > 0 ? (canvasMinDim * 0.25) / maxAmplitude : 1;
+            
+            function animate() {
+                if (!isAnimating) return;
+                
+                fourierCtx.clearRect(0, 0, fourierCanvas.width, fourierCanvas.height);
+                
+                const centerX = fourierCanvas.width / 2;
+                const centerY = fourierCanvas.height / 2;
+                
+                let x = centerX;
+                let y = centerY;
+                
+                // Mostra apenas vetores se checkbox estiver marcado
+                const showVectors = document.getElementById('show-vectors').checked;
+                const showCircles = document.getElementById('show-circles').checked;
+                
+                if (showVectors || showCircles) {
+                    fourierCtx.strokeStyle = 'rgba(0, 0, 255, 0.4)';
+                    fourierCtx.lineWidth = 1;
+                    
+                    for (let i = 0; i < Math.min(fourierData.length, 50); i++) {
+                        const item = fourierData[i];
+                        if (item.enabled === false) continue;
+                        
+                        const { freq, amplitude, phase } = item;
+                        const scaledAmplitude = amplitude * scaleFactor;
+                        
+                        if (showCircles && amplitude > 2.0) {
+                            fourierCtx.beginPath();
+                            fourierCtx.arc(x, y, scaledAmplitude, 0, 2 * Math.PI);
+                            fourierCtx.stroke();
+                        }
+                        
+                        const angle = freq * animationTime * 2 * Math.PI + phase;
+                        const nextX = x + scaledAmplitude * Math.cos(angle);
+                        const nextY = y + scaledAmplitude * Math.sin(angle);
+                        
+                        if (showVectors) {
+                            fourierCtx.beginPath();
+                            fourierCtx.moveTo(x, y);
+                            fourierCtx.lineTo(nextX, nextY);
+                            fourierCtx.stroke();
+                        }
+                        
+                        x = nextX;
+                        y = nextY;
+                    }
+                }
+                
+                // Desenha cada segmento de traço separadamente
+                if (strokeGaps && strokeGaps.length > 0) {
+                    // Define um tamanho de lacuna para garantir a separação adequada entre traços
+                    const gapSize = 0.03; // 3% de lacuna em ambos os lados dos limites
+                    
+                    // Desenha o caminho em segmentos, respeitando os limites do traço
+                    for (let i = 0; i <= strokeGaps.length; i++) {
+                        // Obtém os limites brutos
+                        const rawStartT = i === 0 ? 0 : strokeGaps[i-1];
+                        const rawEndT = i === strokeGaps.length ? 1 : strokeGaps[i];
+                        
+                        // Adiciona margens para criar lacunas visíveis
+                        const startT = i === 0 ? 0 : rawStartT + gapSize;
+                        const endT = i === strokeGaps.length ? 1 : rawEndT - gapSize;
+                        
+                        // Pula se estiver além do tempo atual de animação ou se a lacuna fez o segmento desaparecer
+                        if (startT > animationTime || startT >= endT) {
+                            continue;
+                        }
+                        
+                        // Termina no tempo de animação se ele cair dentro deste segmento
+                        const segmentEndT = Math.min(endT, animationTime);
+                        
+                        // Desenha este segmento de traço
+                        fourierCtx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+                        fourierCtx.lineWidth = 3;
+                        fourierCtx.beginPath();
+                        
+                        let firstPoint = true;
+                        
+                        // Desenha o caminho para este segmento
+                        for (let t = startT; t <= segmentEndT; t += 0.005) {
+                            let pathX = centerX;
+                            let pathY = centerY;
+                            
+                            for (let j = 0; j < fourierData.length; j++) {
+                                const item = fourierData[j];
+                                if (item.enabled === false) continue;
+                                
+                                const { freq, amplitude, phase } = item;
+                                const scaledAmplitude = amplitude * scaleFactor;
+                                const angle = freq * t * 2 * Math.PI + phase;
+                                pathX += scaledAmplitude * Math.cos(angle);
+                                pathY += scaledAmplitude * Math.sin(angle);
+                            }
+                            
+                            if (firstPoint) {
+                                fourierCtx.moveTo(pathX, pathY);
+                                firstPoint = false;
+                            } else {
+                                fourierCtx.lineTo(pathX, pathY);
+                            }
+                        }
+                        
+                        fourierCtx.stroke();
+                    }
+                } else {
+                    // Sem lacunas de traço - desenha normalmente até o tempo de animação
+                    fourierCtx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+                    fourierCtx.lineWidth = 3;
+                    fourierCtx.beginPath();
+                    
+                    let firstPoint = true;
+                    for (let t = 0; t <= endTime; t += 0.005) {
+                        let pathX = centerX;
+                        let pathY = centerY;
+                        
+                        for (let i = 0; i < fourierData.length; i++) {
+                            const item = fourierData[i];
+                            if (item.enabled === false) continue;
+                            
+                            const { freq, amplitude, phase } = item;
+                            const scaledAmplitude = amplitude * scaleFactor;
+                            const angle = freq * t * 2 * Math.PI + phase;
+                            pathX += scaledAmplitude * Math.cos(angle);
+                            pathY += scaledAmplitude * Math.sin(angle);
+                        }
+                        
+                        if (firstPoint) {
+                            fourierCtx.moveTo(pathX, pathY);
+                            firstPoint = false;
+                        } else {
+                            fourierCtx.lineTo(pathX, pathY);
+                        }
+                    }
+                    
+                    fourierCtx.stroke();
+                }
+                
+                // Desenha ponto atual
+                fourierCtx.fillStyle = 'red';
+                fourierCtx.beginPath();
+                fourierCtx.arc(x, y, 5, 0, 2 * Math.PI);
+                fourierCtx.fill();
+                
+                // Desenha comparação com original se ativado
+                if (showComparison) {
+                    drawComparison();
+                }
+                
+                animationTime += 0.001 * animationSpeed;
+                if (animationTime > 1) {
+                    animationTime = 0;
+                }
+                
+                animationFrame = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        // Desenha comparação com desenho original
+        function drawComparison() {
+            fourierCtx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
+            fourierCtx.lineWidth = 2;
+            fourierCtx.beginPath();
+            
+            if (points.length > 0) {
+                fourierCtx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    fourierCtx.lineTo(points[i].x, points[i].y);
+                }
+                fourierCtx.stroke();
+            }
+        }
+        
+        // Exibe equações matemáticas
+        function displayEquations(data) {
+            if (!data || data.length === 0) return;
+            
+            let html = `
+                <div class="mathematical-formulas">
+                    <h4>Série de Fourier Calculada via FFT:</h4>
+                    <p>f(t) = `;
+            
+            for (let i = 0; i < Math.min(8, data.length); i++) {
+                const { freq, amplitude, phase } = data[i];
+                const sign = i === 0 ? '' : ' + ';
+                html += `${sign}${amplitude.toFixed(2)}e<sup>i(${freq}·2πt + ${phase.toFixed(2)})</sup>`;
+            }
+            
+            if (data.length > 8) {
+                html += ' + ...';
+            }
+            
+            html += `</p>
+                    <p><strong>Forma Trigonométrica:</strong></p>
+                    <p>f(t) = `;
+            
+            for (let i = 0; i < Math.min(5, data.length); i++) {
+                const { freq, amplitude, phase } = data[i];
+                const sign = i === 0 ? '' : ' + ';
+                html += `${sign}${amplitude.toFixed(2)}cos(${freq}·2πt + ${phase.toFixed(2)})`;
+            }
+            
+            html += `</p>
+                </div>
+                
+                <h4>Principais Coeficientes (por amplitude):</h4>
+                <ul>`;
+            
+            for (let i = 0; i < Math.min(10, data.length); i++) {
+                const { freq, amplitude, phase } = data[i];
+                html += `<li><strong>C<sub>${freq}</sub></strong> = ${amplitude.toFixed(3)}e<sup>i${phase.toFixed(3)}</sup> 
+                         (amplitude: ${amplitude.toFixed(3)}, frequência: ${freq}, fase: ${phase.toFixed(3)} rad)</li>`;
+            }
+            
+            html += '</ul>';
+            
+            html += `
+                <div class="mathematical-formulas">
+                    <h4>Informações da Implementação:</h4>
+                    <p>• Algoritmo usado: <strong>FFT (Fast Fourier Transform)</strong></p>
+                    <p>• Complexidade computacional: <strong>O(N log N)</strong></p>
+                    <p>• Número total de coeficientes: <strong>${data.length}</strong></p>
+                    <p>• Energia total do sinal: <strong>${data.reduce((sum, d) => sum + d.amplitude * d.amplitude, 0).toFixed(3)}</strong></p>
+                </div>
+            `;
+            
+            equationsContent.innerHTML = html;
+        }
+        
+
+        
+        // Event listeners
+        drawingCanvas.addEventListener('mousedown', startDrawing);
+        drawingCanvas.addEventListener('mousemove', draw);
+        drawingCanvas.addEventListener('mouseup', stopDrawing);
+        drawingCanvas.addEventListener('mouseout', stopDrawing);
+        
+        clearBtn.addEventListener('click', clearCanvas);
+        
+        analyzeBtn.addEventListener('click', () => {
+            calculateFourierFFT();
+        });
+        
+        animateBtn.addEventListener('click', () => {
+            if (isAnimating) {
+                isAnimating = false;
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                }
+                animateBtn.textContent = 'Iniciar Animação';
+            } else {
+                animateFourier();
+            }
+        });
+        
+        compareBtn.addEventListener('click', () => {
+            showComparison = !showComparison;
+            compareBtn.textContent = showComparison ? 'Ocultar Original' : 'Comparar Original';
+            compareBtn.className = showComparison ? 'secondary' : 'secondary';
+        });
+        
+        coeffSlider.addEventListener('input', () => {
+            numCoefficients = parseInt(coeffSlider.value);
+            coeffValue.textContent = numCoefficients;
+            if (points.length > 0) {
+                calculateFourierFFT();
+            }
+        });
+        
+        speedSlider.addEventListener('input', () => {
+            animationSpeed = parseInt(speedSlider.value);
+            speedValue.textContent = animationSpeed;
+        });
+        
+        // Inicialização
+        clearCanvas();
+    </script>
+</body>
+</html>
