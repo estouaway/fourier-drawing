@@ -336,6 +336,34 @@
     </header>
     
     <div class="container">
+        
+        <div class="controls-section">
+            <h3 class="section-title">Fórmulas Matemáticas Implementadas</h3>
+            
+            <div class="mathematical-formulas">
+                <h4>1. Transformada Discreta de Fourier (DFT):</h4>
+                <p>c_k = (1/N) * Σ(n=0 to N-1) f(t_n) * e^(-i*2π*k*t_n)</p>
+                
+                <h4>2. Fast Fourier Transform (FFT) - Algoritmo Cooley-Tukey:</h4>
+                <p>Reduz complexidade de O(N²) para O(N*log(N))</p>
+                <p>Usa divisão recursiva: FFT_N = FFT_par + W_N^k * FFT_ímpar</p>
+                
+                <h4>3. Conversão para Amplitude e Fase:</h4>
+                <p>Amplitude: A = |c_k| = √(Re(c_k)² + Im(c_k)²)</p>
+                <p>Fase: φ = arg(c_k) = arctan(Im(c_k) / Re(c_k))</p>
+                
+                <h4>4. Transformada Inversa de Fourier (IFFT):</h4>
+                <p>f(t) = Σ(k) c_k * e^(i*2π*k*t)</p>
+                <p>Reconstrução: x(t) = Σ A_k * cos(2πkt + φ_k)</p>
+            </div>
+        </div>
+        
+        <div class="equations">
+            <h3 class="section-title">Análise dos Coeficientes de Fourier</h3>
+            <div id="equations-content">
+                <p>Desenhe algo e clique em "Analisar com FFT" para ver a decomposição matemática.</p>
+            </div>
+        </div>
 
         
         <div class="canvas-container">
@@ -422,34 +450,6 @@
                         <!-- Coeficientes serão preenchidos dinamicamente -->
                     </tbody>
                 </table>
-            </div>
-        </div>
-        
-        <div class="controls-section">
-            <h3 class="section-title">Fórmulas Matemáticas Implementadas</h3>
-            
-            <div class="mathematical-formulas">
-                <h4>1. Transformada Discreta de Fourier (DFT):</h4>
-                <p>c_k = (1/N) * Σ(n=0 to N-1) f(t_n) * e^(-i*2π*k*t_n)</p>
-                
-                <h4>2. Fast Fourier Transform (FFT) - Algoritmo Cooley-Tukey:</h4>
-                <p>Reduz complexidade de O(N²) para O(N*log(N))</p>
-                <p>Usa divisão recursiva: FFT_N = FFT_par + W_N^k * FFT_ímpar</p>
-                
-                <h4>3. Conversão para Amplitude e Fase:</h4>
-                <p>Amplitude: A = |c_k| = √(Re(c_k)² + Im(c_k)²)</p>
-                <p>Fase: φ = arg(c_k) = arctan(Im(c_k) / Re(c_k))</p>
-                
-                <h4>4. Transformada Inversa de Fourier (IFFT):</h4>
-                <p>f(t) = Σ(k) c_k * e^(i*2π*k*t)</p>
-                <p>Reconstrução: x(t) = Σ A_k * cos(2πkt + φ_k)</p>
-            </div>
-        </div>
-        
-        <div class="equations">
-            <h3 class="section-title">Análise dos Coeficientes de Fourier</h3>
-            <div id="equations-content">
-                <p>Desenhe algo e clique em "Analisar com FFT" para ver a decomposição matemática.</p>
             </div>
         </div>
     </div>
